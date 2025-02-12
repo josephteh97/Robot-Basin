@@ -9,15 +9,19 @@ This project simulates a *robotic arm cleaning a face-washing bowl* using *MuJoC
 
 robot_cleaning_simulation/
 │── models/                     # MuJoCo models (robot + bowl)
+
 │   │── cleaning_robot.xml      # XML file defining the robot and environment
+
 │── scripts/                    # Python scripts for control and learning
 │   │── cleaning_env.py         # Custom Gym environment for the task
 │   │── train_rl.py             # Reinforcement learning training script
 │   │── eval.py                 # Model evaluation script
+
 │── configs/                    # Configuration files
 │   │── robot_config.yaml       # Robot movement settings
 │   │── rl_config.yaml          # RL hyperparameters
 │── logs/                       # Training performance logs
+
 │── trained_models/             # Saved RL models
 │── requirements.txt            # Dependencies
 │── README.md                   # Project documentation
@@ -49,12 +53,16 @@ python
 from cleaning_env import CleaningEnv
 
 env = CleaningEnv()
+
 obs = env.reset()
+
 done = False
 
 while not done:
     action = env.action_space.sample()  # Random action
+    
     obs, reward, done, _ = env.step(action)
+    
     env.render()
 
 env.close()
