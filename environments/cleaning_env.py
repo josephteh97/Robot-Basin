@@ -7,7 +7,7 @@ import mujoco.viewer
 class CleaningEnv:
     """MuJoCo environment for a robot cleaning a face-washing bowl"""
     
-    def __init__(self, xml_path="cleaning_robot.xml"):
+    def __init__(self, xml_path="ec63_moveit_controller_manager.launch.xml"):
 
         # Load MuJoCo model
         self.model = mujoco.MjModel.from_xml_path(xml_path)
