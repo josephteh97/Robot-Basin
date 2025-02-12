@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Load the MuJoCo model
-model = mujoco.MjModel.from_xml_path('environments/ec63_moveit_controller_manager.xml')  # Update with the path to your MuJoCo model XML file
+model = mujoco.MjModel.from_xml_path('environments/ant.xml')  # Update with the path to your MuJoCo model XML file
+# model = mujoco.MjModel.from_xml_path('models/ec63_description.urdf')
 data = mujoco.MjData(model)
 
 # Create a MuJoCo viewer
