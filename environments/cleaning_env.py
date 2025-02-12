@@ -1,25 +1,24 @@
 import numpy as np
-import gym
-from gym import spaces
+# import gym
+# from gym import spaces
 import mujoco
 import mujoco.viewer
 
-class CleaningEnv(gym.Env):
+class CleaningEnv:
     """MuJoCo environment for a robot cleaning a face-washing bowl"""
     
     def __init__(self, xml_path="cleaning_robot.xml"):
-        super(CleaningEnv, self).__init__()
 
         # Load MuJoCo model
         self.model = mujoco.MjModel.from_xml_path(xml_path)
         self.data = mujoco.MjData(self.model)
 
         # Action Space (Joint control: 6-DOF arm)
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(6,), dtype=np.float32)
+        self.action_space = {'low': -1.0, 'high': 1.0, 'shape': (6,), 'dtype': np.float32}
 
         # Observation Space (Robot joint states + bowl cleanliness)
         obs_dim = self.model.nq + self.model.nv + 1  # Joint positions, velocities, cleanliness score
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
+        self.observation_space = {'low': -np.inf, 'high': np.inf, 'shape': (obs_dim,), 'dtype': np.float32}
 
         # Viewer (Optional for debugging)
         self.viewer = None
