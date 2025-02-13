@@ -28,21 +28,34 @@ basin_asset_options = gymapi.AssetOptions()
 
 print("Loading assets...")
 robot_asset = gym.load_asset(sim, asset_root, robot_asset_file, robot_asset_options)
-basin_asset = gym.load_asset(sim, asset_root, basin_asset_file, basin_asset_options)
+if robot_asset is None:
+    raise Exception(f"Failed to load robot asset from {robot_asset_file}")
 
+basin_asset = gym.load_asset(sim, asset_root, basin_asset_file, basin_asset_options)
+if basin_asset is None:
+    raise Exception(f"Failed to load washbasin asset from {basin_asset_file}")
+print("Assets loaded!")
 
 # Set up the environment
+print("Setting up the environments...")
 env = gym.create_env(sim, gymapi.Vec3(-1, -1, -1), gymapi.Vec3(1, 1, 1), 2)
 robot_handle = gym.create_actor(env, robot_asset, gymapi.Transform(), "robot", 0, 1)
+if robot_handle is None:
+    raise Exception("Failed to create robot actor")
 basin_handle = gym.create_actor(env, basin_asset, gymapi.Transform(), "washbasin", 0, 1)
+if basin_handle is None:
+    raise Exception("Failed to create washbasin actor")
+print("Envionment is successfully setup!")
+
 
 # Create a viewer
 viewer = gym.create_viewer(sim, gymapi.CameraProperties())
 if viewer is None:
     raise Exception("Failed to create viewer")
+print("Viewer is created!")
 
 # Simulation loop
-for _ in range(200):  # Run for 100 timesteps
+for _ in range(10):  # Run for 100 timesteps
     # Step the physics
     gym.simulate(sim)
     gym.fetch_results(sim, True)
