@@ -80,7 +80,7 @@ python train_rl.py
 - The *robot* is modeled in MuJoCo (cleaning_robot.xml).  
 - The *environment* (cleaning_env.py) provides:
   - *Action Space* → Robot joint movements  
-  - *Observation Space* → Joint states + cleanliness score  
+  - *Observation Space* → Joint states + cleanliness score + cleaned area vs expected area  
   - *Reward Function* → Increases as the bowl becomes cleaner  
 - The *robot learns* optimal cleaning motions using RL (e.g., PPO, SAC).  
 
