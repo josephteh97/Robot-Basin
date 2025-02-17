@@ -81,7 +81,7 @@ python train_rl.py
 - The *environment* (cleaning_env.py) provides:
   - *Action Space* → Robot joint movements  
   - *Observation Space* → Joint states + cleanliness score + cleaned area vs expected area  
-  - *Reward Function* → Increases as the bowl becomes cleaner  
+  - *Reward Function* → Increases as the bowl becomes cleaner    based on 1) collision 2) mis-cleaned area 3) dirt recognition
 - The *robot learns* optimal cleaning motions using RL (e.g., PPO, SAC).  
 
 ---
