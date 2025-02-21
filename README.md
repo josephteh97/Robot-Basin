@@ -1,4 +1,4 @@
-# *Robot Cleaning Simulation (MuJoCo)*  
+# *Robot Cleaning Simulation (Isaac Gym)*  
 
 ## *📌 Introduction*  
 This project simulates a *robotic arm cleaning a face-washing bowl* using *MuJoCo* and *Reinforcement Learning (RL). The simulation provides a testing environment where the robot learns optimal cleaning motions using **machine learning algorithms*.  
