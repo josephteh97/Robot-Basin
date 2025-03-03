@@ -12,6 +12,9 @@ def normalize_theta(theta_list):
     # Normalize thetalist into [-np.pi, np.pi]
     return [(theta + np.pi) % (2 * np.pi) - np.pi for theta in theta_list]
 
+def distance(p1, p2):
+    return np.linalg.norm(np.array(p1) - np.array(p2))
+
 def quaternion_distance(q1, q2):
     # Calculate angle between two quaternions
 
@@ -110,22 +113,73 @@ class PybulletClient():
         focus_position, _ = p.getBasePositionAndOrientation(objectId)
         p.resetDebugVisualizerCamera(cameraDistance, cameraYaw, cameraPitch, cameraTargetPosition=focus_position)
 
-    def check_collision(self, objectA, objectB=None):
-        contact_points = p.getContactPoints(bodyA=objectA)
+    def check_collision(self, objectA=None, objectB=None):
+        if objectA is None:
+            contact_points = p.getContactPoints()
+        elif objectB is None:  
+            contact_points = p.getContactPoints(bodyA=objectA)
+        else:
+            contact_points = p.getContactPoints(bodyA=objectA, bodyB=objectB)    
         if contact_points:
-            print("Self-collision detected!")
-            p.addUserDebugText(text="Self-Collision!", textPosition=[-1, 0, 1], textColorRGB=[1, 0, 0], textSize=3)
+            print("Collision detected!")
+            p.addUserDebugText(text="Collision Detected!", textPosition=[-1, 0, 1], textColorRGB=[1, 0, 0], textSize=3)
             for contact in contact_points:
-                print(f"Self-contact info: {contact}")
+                print(f"Contact info: {contact}")
             return True
-        if objectB:
-            contact_points = p.getContactPoints(bodyA=objectA, bodyB=objectB)  
-            if contact_points:
-                print("Collision detected!")
-                p.addUserDebugText(text="Collision Detected!", textPosition=[-1, 0, 1], textColorRGB=[1, 0, 0], textSize=3)
-                for contact in contact_points:
-                    print(f"Contact info: {contact}")
-                return True
+        return False
+    
+    def drawAABB(self, objectId, linkId=None):
+        if linkId:
+            aabb = p.getAABB(objectId, linkId)
+        else:
+            aabb = p.getAABB(objectId)
+        aabbMin = aabb[0]
+        aabbMax = aabb[1]
+        f = [aabbMin[0], aabbMin[1], aabbMin[2]]
+        t = [aabbMax[0], aabbMin[1], aabbMin[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+        f = [aabbMin[0], aabbMin[1], aabbMin[2]]
+        t = [aabbMin[0], aabbMax[1], aabbMin[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+        f = [aabbMin[0], aabbMin[1], aabbMin[2]]
+        t = [aabbMin[0], aabbMin[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMin[0], aabbMin[1], aabbMax[2]]
+        t = [aabbMin[0], aabbMax[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMin[0], aabbMin[1], aabbMax[2]]
+        t = [aabbMax[0], aabbMin[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMax[0], aabbMin[1], aabbMin[2]]
+        t = [aabbMax[0], aabbMin[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMax[0], aabbMin[1], aabbMin[2]]
+        t = [aabbMax[0], aabbMax[1], aabbMin[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMax[0], aabbMax[1], aabbMin[2]]
+        t = [aabbMin[0], aabbMax[1], aabbMin[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMin[0], aabbMax[1], aabbMin[2]]
+        t = [aabbMin[0], aabbMax[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        f = [aabbMax[0], aabbMax[1], aabbMax[2]]
+        t = [aabbMin[0], aabbMax[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+        f = [aabbMax[0], aabbMax[1], aabbMax[2]]
+        t = [aabbMax[0], aabbMin[1], aabbMax[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+        f = [aabbMax[0], aabbMax[1], aabbMax[2]]
+        t = [aabbMax[0], aabbMax[1], aabbMin[2]]
+        p.addUserDebugLine(f, t, [0, 0, 0])
+
+        return aabbMin, aabbMax
 
 class RobotControl():
     def __init__(self, robot_id, useSequentialControl=0):
@@ -146,9 +200,13 @@ class RobotControl():
         self.ik_run_time = None
         self.ik_run_complete = False
         self.useSequentialControl = useSequentialControl
-        self.poserr = 1e-3
-        self.orierr = 1e-3
+        self.poserr = 1e-2
+        self.orierr = 1e-2
+        self.trajectory = {}
+        self.trajectory_idx = 0
 
+        # Initialize end_effector_config
+        self.update_end_effector_config()
         # Initialize TRAC-IK
         self.ik_solver = IK("base_link", "wrist3Joint_Link", solve_type="Distance", urdf_string=open("models/ec66/urdf/ec66.urdf").read())
         self.ik_solver.set_joint_limits([-6.28, -1.57, -6.28, -6.28, -6.28, -6.28], [6.28, 0.0, 6.28, 6.28, 6.28, 6.28])
@@ -160,10 +218,13 @@ class RobotControl():
             current_config.append(joint_state[0]) # Current joint position
         return current_config
     
-    def update_end_effector_config(self):
+    def update_end_effector_config(self, plot_trajectory=False):
+        previous_end_effector_position = self.end_effector_position
         end_effector_link_state = p.getLinkState(self.id, self.num_joints-1)
         self.end_effector_position = end_effector_link_state[4]
         self.end_effector_orientation = end_effector_link_state[5]
+        if plot_trajectory and previous_end_effector_position != self.end_effector_position:
+            self.plot_trajectory(previous_end_effector_position, self.end_effector_position, [1,0,0])
 
     def plot_frame(self, position, orientation, axis_length=0.5):
         '''
@@ -188,6 +249,9 @@ class RobotControl():
         self.frame_plot.extend([line_x, line_y, line_z])
 
         return sphere_id, line_x, line_y, line_z
+    
+    def plot_trajectory(self, previous_pos, current_pos, rgb=None):
+        p.addUserDebugLine(previous_pos, current_pos, lineColorRGB=rgb)
     
     def erase_plot(self):
         if len(self.body_plot) > 0:
@@ -332,5 +396,44 @@ class RobotControl():
             joint_velocity = p.getJointState(self.id, i)[1]
             if joint_velocity > 1e-3:
                 print(f"{YELLOW}[WARNING]: Joint {i} is still moving!   Velocity: {joint_velocity}{RESET}")
+
+    def set_trajectory(self, pos_list, orn_list=None):
+        if orn_list is None:
+            orn_list = [[0, 0, 0, 1]] * len(pos_list)
+        elif len(pos_list) != len(orn_list):
+            raise ValueError("Length of arguments 'pos_list' & 'orn_list' must match!")
+        # Set trajectory        
+        self.trajectory["pos"] = pos_list
+        self.trajectory["orn"] = orn_list
+        self.trajectory_idx = 0
+
+    def step_trajectory(self, plot_trajectory=False):
+        if self.trajectory_idx < len(self.trajectory["pos"]):
+            target_pos = self.trajectory["pos"][self.trajectory_idx]
+            target_orn = self.trajectory["orn"][self.trajectory_idx]
+            success = self.set_target(target_pos, target_orn)
+            if not success:
+                return False
+            if plot_trajectory:
+                if self.trajectory_idx > 0:
+                    self.plot_trajectory(self.trajectory["pos"][self.trajectory_idx - 1], target_pos, [0,0,1])
+            self.trajectory_idx += 1
+        return True
+
+    def set_target(self, target_pos, target_orn, plot_target=False):
+        if len(target_pos) != 3:
+            raise ValueError("Argument 'target_pos' must have 3 elements!")
+        if len(target_orn) != 4:
+            raise ValueError("Argument 'target_orn' must have 4 elements!")
+        self.target_position = target_pos
+        self.target_orientation = target_orn
+        if plot_target:
+            self.erase_plot() # erase previous target plot
+            self.plot_frame(self.target_position, self.target_orientation, axis_length=0.2)
+        success = self.run_ik()
+        if not success:
+            return False
+        return True
+
 
 
