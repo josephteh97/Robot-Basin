@@ -1,4 +1,4 @@
-# *Robot Cleaning Simulation (MuJoCo)*  
+# *Robot Cleaning Simulation (Isaac Gym)*  
 
 ## *📌 Introduction*  
 This project simulates a *robotic arm cleaning a face-washing bowl* using *MuJoCo* and *Reinforcement Learning (RL). The simulation provides a testing environment where the robot learns optimal cleaning motions using **machine learning algorithms*.  
@@ -80,8 +80,8 @@ python train_rl.py
 - The *robot* is modeled in MuJoCo (cleaning_robot.xml).  
 - The *environment* (cleaning_env.py) provides:
   - *Action Space* → Robot joint movements  
-  - *Observation Space* → Joint states + cleanliness score  
-  - *Reward Function* → Increases as the bowl becomes cleaner  
+  - *Observation Space* → Joint states + cleanliness score + cleaned area vs expected area  
+  - *Reward Function* → Increases as the bowl becomes cleaner    based on 1) collision 2) mis-cleaned area 3) dirt recognition
 - The *robot learns* optimal cleaning motions using RL (e.g., PPO, SAC).  
 
 ---

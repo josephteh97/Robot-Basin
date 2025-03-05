@@ -111,6 +111,12 @@ cam_props = gymapi.CameraProperties()
 # Create the viewer *before* setting the camera properties
 viewer = gym.create_viewer(sim, cam_props)
 
+# point camera at middle env
+cam_pos = gymapi.Vec3(4, 3, 2)
+cam_target = gymapi.Vec3(-4, -3, 0)
+middle_env = envs[num_envs // 2 + envs_per_row // 2]
+gym.viewer_camera_look_at(viewer, middle_env, cam_pos, cam_target)
+
 
 
 while not gym.query_viewer_has_closed(viewer):

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="washbasin">
+  <link name="washbasin_link">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia ixx="0.02" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.04"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://washbasin/washbasin.obj" scale="0.1 0.1 0.1"/>
+      </geometry>
+      <material name="clay_color">
+        <color rgba="0.8 0.52 0.25 1"/>
+      </material>
+    </visual>
+    <!-- <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://washbasin/washbasin_collision.STL" scale="0.1 0.1 0.1"/>
+      </geometry>
+    </collision> -->
+  </link>
+</robot>

@@ -7,7 +7,7 @@ import mujoco.viewer
 class CleaningEnv(gym.Env):
     """MuJoCo environment for a robot cleaning a face-washing bowl"""
 
-    metadata = {'render.modes': ['human', 'rgb_array']}
+    metadata = {'render.modes': ['robot_arm', 'rgb_array']}
 
     def __init__(self, xml_path="environments/ec63.xml"):
         super(CleaningEnv, self).__init__()
@@ -72,6 +72,15 @@ class CleaningEnv(gym.Env):
 
 # Register the custom environment
 gym.envs.registration.register(
+    id='CleaningEnv-v0',
+    entry_point='custom_cleaning_env:CleaningEnv',
+)
+
+import gym
+from gym.envs.registration import register
+
+# Register the custom environment
+register(
     id='CleaningEnv-v0',
     entry_point='custom_cleaning_env:CleaningEnv',
 )
