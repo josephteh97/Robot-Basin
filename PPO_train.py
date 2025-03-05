@@ -17,7 +17,7 @@ model = PPO(
     env, 
     device='cpu',
     verbose=1,
-    learning_rate=3e-4,
+    learning_rate=5e-3,
     batch_size=64,
     n_steps=2048,
     n_epochs=10
