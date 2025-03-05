@@ -1,0 +1,12 @@
+Rigid Body Mapping
+Rigid Body ID	URDF Component	Type	Description
+0	World/Environment	Virtual Base	Simulator’s default "world" frame (not part of your URDF).
+1	base_link	Fixed Base	Your robot’s root link (static unless your robot is mobile).
+2	baseJoint_Link	Revolute Joint	Controlled by baseJoint (Joint 1).
+3	shoulderJoint_Link	Revolute Joint	Controlled by shoulderJoint (Joint 2).
+4	elbowJoint_Link	Revolute Joint	Controlled by elbowJoint (Joint 3).
+5	wrist1Joint_Link	Revolute Joint	Controlled by wrist1Joint (Joint 4).
+6	wrist2Joint_Link	Revolute Joint	Controlled by wrist2Joint (Joint 5).
+7	wrist3Joint_Link	Revolute Joint	Controlled by wrist3Joint (Joint 6).
+8	brush	Fixed Joint	End effector (connected via brush_joint to wrist3Joint_Link).
+
