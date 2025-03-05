@@ -30,7 +30,7 @@ eval_callback = EvalCallback(env, best_model_save_path='./logs/',
 
 # Train the model with TensorBoard logging
 try:
-    model.learn(total_timesteps=100000, callback=[checkpoint_callback, eval_callback], tb_log_name="ppo_cleaning_robot")
+    model.learn(total_timesteps=10000000, callback=[checkpoint_callback, eval_callback], tb_log_name="ppo_cleaning_robot")
 except KeyboardInterrupt:
     print("Training interrupted. Saving model...")
     model.save("trained_models/ppo_cleaning_robot_interrupted")
