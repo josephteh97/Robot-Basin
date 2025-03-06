@@ -26,6 +26,8 @@ class EC66CleaningEnv(gym.Env):
         self.cleaned_area = 0.0
 
         
+
+        
         # RL setup
         self.action_space = spaces.Box(
             low=-1.0, 
@@ -60,16 +62,27 @@ class EC66CleaningEnv(gym.Env):
         sim_params = gymapi.SimParams()
         sim_params.dt = 1.0/20.0
         sim_params.substeps = 2
-        sim_params.physx.solver_type = 1
-        sim_params.physx.num_position_iterations = 4
-        sim_params.physx.num_velocity_iterations = 1
-        sim_params.physx.use_gpu = self.args.use_gpu
         sim_params.use_gpu_pipeline = False
+
+        if self.args.physics_engine == gymapi.SIM_FLEX:
+            sim_params.flex.solver_type = 5
+            sim_params.flex.num_outer_iterations = 4
+            sim_params.flex.num_inner_iterations = 15
+            sim_params.flex.relaxation = 0.75
+            sim_params.flex.warm_start = 0.8
+        elif self.physics_engine == gymapi.SIM_PHYSX:
+            sim_params.solver_type = 1
+            sim_params.physx.num_position_iterations = 8
+            sim_params.physx.num_velocity_iterations = 4
+            sim_params.physx.num_threads = self.args.num_threads
+            sim_params.physx.use_gpu = self.args.use_gpu
+
+
         
         sim = self.gym.create_sim(
             self.args.compute_device_id,
             self.args.graphics_device_id,
-            gymapi.SIM_PHYSX,
+            self.atgs.physics_engine,    # gymapi.SIM_PHYSX
             sim_params
         )
         if not sim:
