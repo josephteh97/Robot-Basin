@@ -14,7 +14,7 @@ class EC66CleaningEnv(gym.Env):
         
         # Initialize Isaac Gym components
         self.gym = gymapi.acquire_gym()
-        self.args = gymutil.parse_arguments()
+        self.args = gymutil.parse_arguments(description="EC66 Elite Robot and Table Cleaning Task")
         self.sim = self._create_sim()
         self.env = self._create_environment()
         self.robot_handle, self.dof_props, self.num_dofs = self._load_robot()
@@ -58,7 +58,7 @@ class EC66CleaningEnv(gym.Env):
 
     def _create_sim(self):
         sim_params = gymapi.SimParams()
-        sim_params.dt = 1/60.0
+        sim_params.dt = 1.0/20.0
         sim_params.substeps = 2
         sim_params.physx.solver_type = 1
         sim_params.physx.num_position_iterations = 4
